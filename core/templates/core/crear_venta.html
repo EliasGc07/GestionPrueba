@@ -1,0 +1,362 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Nueva Venta - Gestor de Inventario{% endblock %}
+{% block page_title %}Nueva Venta{% endblock %}
+
+{% block content %}
+<!-- Start block -->
+<section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 antialiased">
+    <div class="mx-auto max-w-screen-2xl px-4 lg:px-12">
+        <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+            
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0 md:space-x-4 p-4 border-b dark:border-gray-700">
+                <div class="flex-1 flex items-center space-x-2">
+                    <h5 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        <svg class="w-6 h-6 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                        Crear Nueva Venta
+                    </h5>
+                </div>
+                <div class="flex-shrink-0 flex items-center space-x-3">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <span class="font-semibold" id="contadorProductos">0</span> productos agregados
+                    </span>
+                </div>
+            </div>
+
+            <form id="formVenta" method="POST" action="{% url 'crear_venta' %}">
+                {% csrf_token %}
+                
+                <!-- Selección de productos -->
+                <div class="flex flex-col md:flex-row items-stretch md:items-center md:space-x-3 space-y-3 md:space-y-0 justify-between mx-4 py-4 border-b dark:border-gray-700">
+                    <div class="w-full md:w-2/3">
+                        <label for="inputBuscarProducto" class="sr-only">Buscar producto</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="inputBuscarProducto" 
+                                placeholder="Buscar producto por nombre..." 
+                                autocomplete="off"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                            
+                            <!-- Dropdown con resultados de búsqueda -->
+                            <div id="resultadosBusqueda" class="hidden absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+                        <input type="hidden" id="productoSeleccionadoId" value="">
+                    </div>
+                    <div class="w-full md:w-auto flex items-center space-x-3">
+                        <input type="number" id="inputCantidad" min="1" value="1" placeholder="Cantidad" class="w-24 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <button type="button" onclick="agregarProducto()" class="flex items-center justify-center text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800">
+                            <svg class="h-3.5 w-3.5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path clip-rule="evenodd" fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"></path>
+                            </svg>
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de productos -->
+                <div class="overflow-x-auto">
+                    <table id="tablaProductos" class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Producto</th>
+                                <th scope="col" class="px-4 py-3 text-right">Precio Unit.</th>
+                                <th scope="col" class="px-4 py-3 text-center">Cantidad</th>
+                                <th scope="col" class="px-4 py-3 text-right">Subtotal</th>
+                                <th scope="col" class="px-4 py-3 text-center">
+                                    <span class="sr-only">Acciones</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyProductos">
+                            <tr id="filaVacia">
+                                <td colspan="5" class="px-4 py-12 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No hay productos agregados</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">Selecciona productos del listado superior</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer con totales y acciones -->
+                <div class="border-t dark:border-gray-700">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0 p-4">
+                        <!-- Método de pago -->
+                        <div class="w-full md:w-1/3">
+                            <label for="metodoPago" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                </svg>
+                                Método de Pago *
+                            </label>
+                            <select name="metodo_pago" id="metodoPago" required class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                <option value="">Seleccionar...</option>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia</option>
+                                <option value="Tarjeta">Tarjeta</option>
+                            </select>
+                        </div>
+
+                        <!-- Total -->
+                        <div class="flex items-center space-x-6">
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total de la venta</p>
+                                <p id="totalVenta" class="text-3xl font-bold text-primary-600 dark:text-primary-500">$0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex items-center justify-end space-x-4 p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                        <a href="{% url 'ventas' %}" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                            <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                            <svg class="w-4 h-4 inline-block mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Registrar Venta
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input oculto para enviar productos -->
+                <input type="hidden" name="productos" id="inputProductos" value="[]">
+            </form>
+
+        </div>
+    </div>
+</section>
+<!-- End block -->
+
+<script>
+let productosVenta = [];
+let todosLosProductos = [
+    {% for producto in productos %}
+    {
+        id_product: "{{ producto.id_product }}",
+        nombre: "{{ producto.name }}",
+        precio: {{ producto.price_sale }},
+        stock: {{ producto.stock }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+// Búsqueda de productos
+const inputBuscar = document.getElementById('inputBuscarProducto');
+const resultadosDiv = document.getElementById('resultadosBusqueda');
+const productoSeleccionadoInput = document.getElementById('productoSeleccionadoId');
+
+inputBuscar.addEventListener('input', function() {
+    const termino = this.value.toLowerCase().trim();
+    
+    if (termino.length === 0) {
+        resultadosDiv.classList.add('hidden');
+        productoSeleccionadoInput.value = '';
+        return;
+    }
+    
+    const resultados = todosLosProductos.filter(p => 
+        p.nombre.toLowerCase().includes(termino)
+    );
+    
+    if (resultados.length === 0) {
+        resultadosDiv.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">No se encontraron productos</div>';
+        resultadosDiv.classList.remove('hidden');
+        productoSeleccionadoInput.value = '';
+    } else {
+        let html = '';
+        resultados.forEach(producto => {
+            const stockClass = producto.stock === 0 ? 'text-red-600' : producto.stock < 10 ? 'text-yellow-600' : 'text-green-600';
+            html += `
+                <div class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border-b dark:border-gray-600 last:border-b-0" 
+                     onclick="seleccionarProducto('${producto.id_product}', '${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio}, ${producto.stock})">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">${producto.nombre}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">$${producto.precio.toLocaleString()}</p>
+                        </div>
+                        <span class="text-xs font-semibold ${stockClass}">Stock: ${producto.stock}</span>
+                    </div>
+                </div>
+            `;
+        });
+        resultadosDiv.innerHTML = html;
+        resultadosDiv.classList.remove('hidden');
+    }
+});
+
+// Cerrar resultados al hacer clic fuera
+document.addEventListener('click', function(e) {
+    if (!inputBuscar.contains(e.target) && !resultadosDiv.contains(e.target)) {
+        resultadosDiv.classList.add('hidden');
+    }
+});
+
+// Seleccionar un producto del dropdown
+function seleccionarProducto(id, nombre, precio, stock) {
+    inputBuscar.value = nombre;
+    productoSeleccionadoInput.value = id;
+    productoSeleccionadoInput.dataset.nombre = nombre;
+    productoSeleccionadoInput.dataset.precio = precio;
+    productoSeleccionadoInput.dataset.stock = stock;
+    resultadosDiv.classList.add('hidden');
+    
+    // Focus en el input de cantidad
+    document.getElementById('inputCantidad').focus();
+}
+
+// Permitir agregar con Enter
+inputBuscar.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (productoSeleccionadoInput.value) {
+            agregarProducto();
+        }
+    }
+});
+
+document.getElementById('inputCantidad').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        agregarProducto();
+    }
+});
+
+function agregarProducto() {
+    const productoId = productoSeleccionadoInput.value;
+    const cantidad = parseInt(document.getElementById('inputCantidad').value);
+    
+    if (!productoId) {
+        alert('Selecciona un producto de la lista');
+        inputBuscar.focus();
+        return;
+    }
+    
+    if (cantidad <= 0 || isNaN(cantidad)) {
+        alert('Ingresa una cantidad válida');
+        return;
+    }
+    
+    const nombre = productoSeleccionadoInput.dataset.nombre;
+    const precio = parseFloat(productoSeleccionadoInput.dataset.precio);
+    const stock = parseFloat(productoSeleccionadoInput.dataset.stock);
+    
+    // Verificar si ya existe en el carrito y sumar la cantidad actual
+    const productoExistente = productosVenta.find(p => p.id_product === productoId);
+    const cantidadActualEnCarrito = productoExistente ? productoExistente.quantity : 0;
+    const cantidadTotalSolicitada = cantidadActualEnCarrito + cantidad;
+    
+    // Validar que la cantidad total no supere el stock disponible
+    if (cantidadTotalSolicitada > stock) {
+        alert('Stock insuficiente. Disponible: ' + stock + ', Ya tienes en carrito: ' + cantidadActualEnCarrito);
+        return;
+    }
+    
+    const producto = {
+        id_product: productoId,
+        nombre: nombre,
+        price: precio,
+        quantity: cantidad,
+        subtotal: precio * cantidad
+    };
+    
+    // Si ya existe, actualizar cantidad y subtotal
+    if (productoExistente) {
+        productoExistente.quantity += cantidad;
+        productoExistente.subtotal = productoExistente.price * productoExistente.quantity;
+    } else {
+        productosVenta.push(producto);
+    }
+    
+    actualizarTabla();
+    
+    // Limpiar campos
+    inputBuscar.value = '';
+    productoSeleccionadoInput.value = '';
+    document.getElementById('inputCantidad').value = 1;
+    inputBuscar.focus();
+}
+
+function eliminarProducto(index) {
+    productosVenta.splice(index, 1);
+    actualizarTabla();
+}
+
+function actualizarTabla() {
+    const tbody = document.getElementById('bodyProductos');
+    const contadorProductos = document.getElementById('contadorProductos');
+    
+    contadorProductos.textContent = productosVenta.length;
+    
+    if (productosVenta.length === 0) {
+        tbody.innerHTML = '<tr id="filaVacia">' +
+            '<td colspan="5" class="px-4 py-12 text-center">' +
+            '<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>' +
+            '</svg>' +
+            '<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No hay productos agregados</p>' +
+            '<p class="text-xs text-gray-400 dark:text-gray-500">Selecciona productos del listado superior</p>' +
+            '</td>' +
+            '</tr>';
+    } else {
+        let html = '';
+        productosVenta.forEach((p, index) => {
+            html += '<tr class="border-b dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">' +
+                '<th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">' + p.nombre + '</th>' +
+                '<td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">$' + p.price.toLocaleString() + '</td>' +
+                '<td class="px-4 py-3 text-center">' +
+                '<span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-primary-900 dark:text-primary-300">' + p.quantity + '</span>' +
+                '</td>' +
+                '<td class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">$' + p.subtotal.toLocaleString() + '</td>' +
+                '<td class="px-4 py-3 text-center">' +
+                '<button type="button" onclick="eliminarProducto(' + index + ')" class="inline-flex items-center text-red-600 hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">' +
+                '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">' +
+                '<path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>' +
+                '</svg>' +
+                '</button>' +
+                '</td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
+    
+    const total = productosVenta.reduce((sum, p) => sum + p.subtotal, 0);
+    document.getElementById('totalVenta').textContent = '$' + total.toLocaleString();
+    document.getElementById('inputProductos').value = JSON.stringify(productosVenta);
+}
+
+document.getElementById('formVenta').addEventListener('submit', function(e) {
+    if (productosVenta.length === 0) {
+        e.preventDefault();
+        alert('Debes agregar al menos un producto');
+        return;
+    }
+    
+    const metodoPago = document.getElementById('metodoPago').value;
+    if (!metodoPago) {
+        e.preventDefault();
+        alert('Debes seleccionar un método de pago');
+        return;
+    }
+});
+</script>
+{% endblock %}

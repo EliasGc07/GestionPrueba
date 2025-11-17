@@ -1,0 +1,220 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Ventas - Gestor de Inventario{% endblock %}
+{% block page_title %}Ventas{% endblock %}
+
+{% block content %}
+<!-- Main Section -->
+<section class="bg-gray-50 dark:bg-gray-900 antialiased">
+    <div class="mx-auto max-w-screen-xl px-4">
+        
+        <!-- Estadísticas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Ventas</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_ventas }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Activas</p>
+                        <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ ventas_activas }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Canceladas</p>
+                        <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ ventas_canceladas }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ingresos</p>
+                        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${{ total_ingresos|floatformat:0 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+            <!-- Header con filtros y acciones -->
+            <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
+                <!-- Filtros -->
+                <div class="w-full md:w-2/3">
+                    <form method="GET" action="{% url 'ventas' %}" class="flex flex-wrap gap-2">
+                        <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input type="date" name="fecha_fin" value="{{ fecha_fin }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <select name="estado" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">Todos</option>
+                            <option value="true" {% if estado == 'true' %}selected{% endif %}>Activas</option>
+                            <option value="false" {% if estado == 'false' %}selected{% endif %}>Canceladas</option>
+                        </select>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800">Filtrar</button>
+                        {% if fecha_inicio or fecha_fin or estado %}
+                        <a href="{% url 'ventas' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border hover:bg-gray-100">Limpiar</a>
+                        {% endif %}
+                    </form>
+                </div>
+                
+                <!-- Botón Nueva Venta -->
+                <a href="{% url 'crear_venta' %}" class="px-4 py-2 text-sm font-medium text-white rounded-lg bg-blue-700 hover:bg-blue-800">
+                    <svg class="h-3.5 w-3.5 inline mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" /></svg>
+                    Nueva Venta
+                </a>
+            </div>
+
+            <!-- Tabla -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Fecha</th>
+                            <th class="px-4 py-3">Items</th>
+                            <th class="px-4 py-3">Total</th>
+                            <th class="px-4 py-3">Método Pago</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venta in ventas %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-3">{{ venta.id_sale|slice:":8" }}...</td>
+                            <td class="px-4 py-3">{{ venta.date_sale|date:"d/m/Y" }}</td>
+                            <td class="px-4 py-3">{{ venta.items }}</td>
+                            <td class="px-4 py-3 font-semibold text-green-600">${{ venta.total|floatformat:0 }}</td>
+                            <td class="px-4 py-3">{{ venta.pay_method }}</td>
+                            <td class="px-4 py-3">
+                                {% if venta.state %}
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Activa</span>
+                                {% else %}
+                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Cancelada</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center space-x-2">
+                                    <a href="{% url 'detalle_venta' venta.id_sale %}" class="font-medium text-blue-600 hover:underline dark:text-blue-500" title="Ver detalle">
+                                        <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </a>
+                                    <a href="{% url 'editar_venta' venta.id_sale %}" class="font-medium text-green-600 hover:underline dark:text-green-500" title="Editar venta">
+                                        <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/>
+                                            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No hay ventas</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal cancelar -->
+<div id="modalCancelar" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 items-center justify-center">
+    <div class="relative p-4 w-full max-w-md">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Botón cerrar -->
+            <button type="button" onclick="cerrarModalCancelar()" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+            <!-- Contenido del modal -->
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 text-red-600 w-14 h-14 dark:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                    ¿Estás seguro de que deseas cancelar esta venta?
+                </h3>
+                <p class="mb-5 text-sm text-gray-400 dark:text-gray-500">
+                    Esta acción cambiará el estado de la venta a cancelada.
+                </p>
+                <button type="button" onclick="confirmarEliminarVenta()" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Sí, cancelar venta
+                </button>
+                <button type="button" onclick="cerrarModalCancelar()" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                    No, volver
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let ventaIdCancelar = null;
+
+    // Funciones para el modal de cancelación
+    function confirmarCancelacion(ventaId) {
+        ventaIdCancelar = ventaId;
+        const modal = document.getElementById('modalCancelar');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function cerrarModalCancelar() {
+        const modal = document.getElementById('modalCancelar');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        ventaIdCancelar = null;
+    }
+
+    function confirmarEliminarVenta() {
+        if (ventaIdCancelar) {
+            window.location.href = '/ventas/cancelar/' + ventaIdCancelar + '/';
+        }
+    }
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('modalCancelar')?.addEventListener('click', function(event) {
+        if (event.target === this) {
+            cerrarModalCancelar();
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,463 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - {{ nombre_tienda }}{% endblock %}
+
+{% block page_title %}Dashboard - {{ nombre_tienda }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+        <p class="text-blue-100 text-sm font-medium">Productos Activos</p>
+        <p class="text-3xl font-bold mt-2">{{ productos_activos }}</p>
+        <p class="text-blue-100 text-xs mt-2">{{ productos_sin_stock }} agotados | {{ productos_stock_bajo }} stock bajo</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+        <p class="text-green-100 text-sm font-medium">Ingresos del Mes</p>
+        <p class="text-3xl font-bold mt-2">${{ ingresos_mes|floatformat:0 }}</p>
+        <p class="text-green-100 text-xs mt-2">{{ cantidad_ventas_mes }} ventas</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+        <p class="text-purple-100 text-sm font-medium">Ventas Hoy</p>
+        <p class="text-3xl font-bold mt-2">${{ ingresos_hoy|floatformat:0 }}</p>
+        <p class="text-purple-100 text-xs mt-2">{{ cantidad_ventas_hoy }} transacciones</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+        <p class="text-orange-100 text-sm font-medium">Usuarios</p>
+        <p class="text-3xl font-bold mt-2">{{ total_usuarios }}</p>
+        <p class="text-orange-100 text-xs mt-2">{{ usuarios_activos }} activos | {{ usuarios_admin }} admins</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Valor del Inventario</h3>
+            <div class="bg-indigo-100 p-2 rounded-lg">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900">${{ valor_inventario|floatformat:0 }}</p>
+        <p class="text-sm text-gray-600 mt-2">Valor total en stock</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Promedio por Venta</h3>
+            <div class="bg-teal-100 p-2 rounded-lg">
+                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900">${{ promedio_venta|floatformat:0 }}</p>
+        <p class="text-sm text-gray-600 mt-2">Ticket promedio del mes</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Utilidad del Mes</h3>
+            <div class="bg-emerald-100 p-2 rounded-lg">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+            </div>
+        </div>
+        <p class="text-3xl font-bold text-gray-900">${{ utilidad_mes|floatformat:0 }}</p>
+        <p class="text-sm text-gray-600 mt-2">Ganancia estimada</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Últimas Ventas</h3>
+            <a href="{% url 'ventas' %}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todas →</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for venta in ultimas_ventas %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ venta.date_sale|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ venta.items }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-900">${{ venta.total|floatformat:0 }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            {% if venta.state %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 font-medium">Completada</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 font-medium">Cancelada</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            No hay ventas registradas
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Stock Crítico</h3>
+            <a href="{% url 'productos' %}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todos →</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for producto in productos_criticos %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ producto.name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ producto.category }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            {% if producto.stock == 0 %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 font-semibold">{{ producto.stock }} - Agotado</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 font-semibold">{{ producto.stock }} - Bajo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="px-4 py-8 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Todos los productos tienen stock suficiente
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos de Análisis -->
+<div class="grid grid-cols-1 gap-6 mb-6">
+    
+    <!-- Gráfico: Stock por Producto -->
+    <div class="bg-white rounded-lg shadow-sm p-2 sm:p-4 md:p-6 border border-gray-100 w-full" style="max-width: 1400px; margin: 0 auto;">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h5 class="text-lg sm:text-xl font-bold leading-none text-gray-900 mb-1">Stock por Producto</h5>
+                <p class="text-xs sm:text-sm font-normal text-gray-500">Inventario disponible de cada producto</p>
+            </div>
+            <div class="flex items-center px-2.5 py-0.5 text-base font-semibold text-blue-600">
+                <svg class="w-3 h-3 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+            </div>
+        </div>
+        <div class="w-full py-2 sm:py-4 overflow-x-auto" style="overflow-x: scroll; -webkit-overflow-scrolling: touch;">
+            <div style="min-width: 360px;">
+                {{ grafico_stock|safe }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 items-center border-gray-200 border-t pt-3 mt-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <span class="text-xs text-gray-500">🟢 Stock suficiente | 🟡 Stock bajo | 🔴 Agotado</span>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico: Precio vs Ventas -->
+    <div class="bg-white rounded-lg shadow-sm p-2 sm:p-4 md:p-6 border border-gray-100 w-full" style="max-width: 1400px; margin: 0 auto;">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h5 class="text-lg sm:text-xl font-bold leading-none text-gray-900 mb-1">Precio vs Cantidad Vendida</h5>
+                <p class="text-xs sm:text-sm font-normal text-gray-500">Relación entre precio y volumen de ventas por producto</p>
+            </div>
+            <div class="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-600">
+                <svg class="w-3 h-3 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13V1m0 0L1 5m4-4 4 4"/>
+                </svg>
+            </div>
+        </div>
+        <div class="w-full py-2 sm:py-4 overflow-x-auto" style="overflow-x: scroll; -webkit-overflow-scrolling: touch;">
+            <div style="min-width: 360px;">
+                {{ grafico_precio_ventas|safe }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 items-center border-gray-200 border-t pt-3 mt-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <span class="text-xs text-gray-500">🔵 Precio promedio | 🟢 Cantidad vendida</span>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico: Historial de Ganancias -->
+    <div class="bg-white rounded-lg shadow-sm p-2 sm:p-4 md:p-6 border border-gray-100 w-full" style="max-width: 1400px; margin: 0 auto;">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h5 class="text-lg sm:text-xl font-bold leading-none text-gray-900 mb-1">Historial de Ganancias</h5>
+                <p class="text-xs sm:text-sm font-normal text-gray-500">Crecimiento acumulado de ventas en el tiempo</p>
+            </div>
+            <div class="flex items-center px-2.5 py-0.5 text-base font-semibold text-purple-600">
+                <svg class="w-3 h-3 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13V1m0 0L1 5m4-4 4 4"/>
+                </svg>
+            </div>
+        </div>
+        <div class="w-full py-2 sm:py-4 overflow-x-auto" style="overflow-x: scroll; -webkit-overflow-scrolling: touch;">
+            <div style="min-width: 360px;">
+                {{ grafico_ganancias|safe }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 items-center border-gray-200 border-t pt-3 mt-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <span class="text-xs text-gray-500">📈 Tendencia de crecimiento acumulado</span>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico: Ventas por Producto en el Tiempo -->
+    <div class="bg-white rounded-lg shadow-sm p-2 sm:p-4 md:p-6 border border-gray-100 w-full" style="max-width: 1400px; margin: 0 auto;">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h5 class="text-lg sm:text-xl font-bold leading-none text-gray-900 mb-1">Ventas por Producto en el Tiempo</h5>
+                <p class="text-xs sm:text-sm font-normal text-gray-500">Selecciona un producto para ver su historial de ventas</p>
+            </div>
+            <div class="flex items-center px-2.5 py-0.5 text-base font-semibold text-orange-600">
+                <svg class="w-3 h-3 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13V1m0 0L1 5m4-4 4 4"/>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Dropdown selector de productos -->
+        <div class="mb-4">
+            <label for="producto-selector" class="block text-sm font-medium text-gray-700 mb-2">
+                Seleccionar Producto:
+            </label>
+            <select id="producto-selector" class="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                <option value="">-- Selecciona un producto --</option>
+                {% for producto in productos_dropdown %}
+                <option value="{{ producto.id_product }}">{{ producto.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Loading spinner (oculto por defecto) -->
+        <div id="loading-spinner" class="hidden text-center py-8">
+            <svg class="animate-spin h-10 w-10 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-sm text-gray-500 mt-2">Cargando datos...</p>
+        </div>
+
+        <!-- Contenedor del gráfico -->
+        <div class="w-full py-2 sm:py-4 overflow-x-auto" style="overflow-x: scroll; -webkit-overflow-scrolling: touch;">
+            <div style="min-width: 360px;">
+                {{ grafico_ventas_por_producto|safe }}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 items-center border-gray-200 border-t pt-3 mt-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <span class="text-xs text-gray-500">📊 Historial de ventas del producto seleccionado</span>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para el gráfico interactivo -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('producto-selector');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    if (selector) {
+        selector.addEventListener('change', function() {
+            const productoId = this.value;
+            
+            if (!productoId) {
+                // Si no hay producto seleccionado, mostrar mensaje inicial
+                Plotly.newPlot('grafico_ventas_producto', [{
+                    x: [],
+                    y: [],
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: {color: '#3b82f6', width: 2},
+                    marker: {size: 8, color: '#3b82f6'}
+                }], {
+                    title: 'Selecciona un producto del menú desplegable',
+                    xaxis: {title: 'Fecha'},
+                    yaxis: {title: 'Cantidad Vendida'},
+                    font: {family: 'Inter, sans-serif'},
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    showlegend: false,
+                    margin: {l: 50, r: 30, t: 50, b: 50},
+                    annotations: [{
+                        text: 'Selecciona un producto para ver su historial de ventas',
+                        xref: 'paper',
+                        yref: 'paper',
+                        x: 0.5,
+                        y: 0.5,
+                        xanchor: 'center',
+                        yanchor: 'middle',
+                        showarrow: false,
+                        font: {size: 14, color: '#6b7280'}
+                    }]
+                }, {
+                    responsive: true,
+                    displayModeBar: false
+                });
+                return;
+            }
+            
+            // Mostrar spinner
+            loadingSpinner.classList.remove('hidden');
+            
+            // Hacer fetch al API
+            fetch(`/api/ventas-producto-por-fecha/?producto_id=${productoId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los datos');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Ocultar spinner
+                    loadingSpinner.classList.add('hidden');
+                    
+                    // Verificar si hay datos
+                    if (data.fechas.length === 0) {
+                        Plotly.newPlot('grafico_ventas_producto', [{
+                            x: [],
+                            y: [],
+                            type: 'scatter',
+                            mode: 'lines+markers'
+                        }], {
+                            title: `${data.producto_nombre} - Sin ventas registradas`,
+                            xaxis: {title: 'Fecha'},
+                            yaxis: {title: 'Cantidad Vendida'},
+                            font: {family: 'Inter, sans-serif'},
+                            paper_bgcolor: 'rgba(0,0,0,0)',
+                            plot_bgcolor: 'rgba(0,0,0,0)',
+                            showlegend: false,
+                            margin: {l: 50, r: 30, t: 50, b: 50},
+                            annotations: [{
+                                text: 'No hay ventas registradas para este producto',
+                                xref: 'paper',
+                                yref: 'paper',
+                                x: 0.5,
+                                y: 0.5,
+                                xanchor: 'center',
+                                yanchor: 'middle',
+                                showarrow: false,
+                                font: {size: 14, color: '#6b7280'}
+                            }]
+                        }, {
+                            responsive: true,
+                            displayModeBar: false
+                        });
+                        return;
+                    }
+                    
+                    // Actualizar el gráfico con los datos
+                    const trace = {
+                        x: data.fechas,
+                        y: data.cantidades,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        name: 'Cantidad Vendida',
+                        line: {
+                            color: '#3b82f6',
+                            width: 3,
+                            shape: 'linear'
+                        },
+                        marker: {
+                            size: 8,
+                            color: '#3b82f6',
+                            line: {
+                                color: '#1e40af',
+                                width: 2
+                            }
+                        },
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(59, 130, 246, 0.1)'
+                    };
+                    
+                    const layout = {
+                        title: {
+                            text: `Ventas de ${data.producto_nombre}`,
+                            font: {size: 16, color: '#111827', family: 'Inter, sans-serif'}
+                        },
+                        xaxis: {
+                            title: 'Fecha',
+                            gridcolor: '#e5e7eb',
+                            showgrid: true,
+                            zeroline: false,
+                            font: {family: 'Inter, sans-serif'}
+                        },
+                        yaxis: {
+                            title: 'Cantidad Vendida',
+                            gridcolor: '#e5e7eb',
+                            showgrid: true,
+                            zeroline: false,
+                            font: {family: 'Inter, sans-serif'}
+                        },
+                        font: {family: 'Inter, sans-serif'},
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        showlegend: false,
+                        hovermode: 'closest',
+                        margin: {l: 50, r: 30, t: 60, b: 50}
+                    };
+                    
+                    const config = {
+                        responsive: true,
+                        displayModeBar: false
+                    };
+                    
+                    Plotly.newPlot('grafico_ventas_producto', [trace], layout, config);
+                })
+                .catch(error => {
+                    // Ocultar spinner
+                    loadingSpinner.classList.add('hidden');
+                    
+                    console.error('Error:', error);
+                    alert('Hubo un error al cargar los datos. Por favor, intenta de nuevo.');
+                });
+        });
+    }
+});
+</script>
+
+{% endblock %}

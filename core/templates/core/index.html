@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <h2 class="text-2xl mb-4">¡Hola, Tailwind y htmx!</h2>
+
+    <button 
+        hx-get="{% url 'click-me' %}" 
+        hx-target="#response-div" 
+        hx-swap="innerHTML"
+        class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700"
+    >
+        Haz Clic (htmx)
+    </button>
+
+    <div id="response-div" class="mt-4 p-4 bg-white rounded shadow">
+        </div>
+{% endblock %}

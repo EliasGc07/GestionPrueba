@@ -1,0 +1,222 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Producto - Gestor de Inventario{% endblock %}
+{% block page_title %}Editar Producto{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Encabezado -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Editar Producto</h1>
+        <p class="text-gray-600">Modifica los datos del producto "{{ producto.name }}"</p>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-50 border-l-4 border-red-400 text-red-700{% else %}bg-green-50 border-l-4 border-green-400 text-green-700{% endif %} p-4 rounded-lg" role="alert">
+            <p class="font-medium">{{ message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Formulario -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form method="POST" action="{% url 'editar_producto' producto.id_product %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Imagen del Producto -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Imagen del Producto
+                </label>
+                
+                <!-- Vista previa de la imagen actual -->
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        {% if imagen_base64 %}
+                        <img id="preview-image" src="data:image/jpeg;base64,{{ imagen_base64 }}" class="h-32 w-32 object-cover rounded-lg border-2 border-gray-200" alt="{{ producto.name }}">
+                        {% else %}
+                        <div id="preview-image" class="h-32 w-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                            <span class="text-white font-bold text-4xl">{{ producto.name|first|upper }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex-1">
+                        <input 
+                            type="file" 
+                            id="image" 
+                            name="image" 
+                            accept="image/*"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="previewImage(event)"
+                        >
+                        <p class="text-xs text-gray-500 mt-2">
+                            Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 5MB<br>
+                            <span class="text-yellow-600">Si no seleccionas una nueva imagen, se mantendrá la actual</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nombre del Producto -->
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del Producto <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    value="{{ producto.name }}"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                >
+            </div>
+
+            <!-- Stock -->
+            <div class="mb-4">
+                <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
+                    Stock <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="number" 
+                    id="stock" 
+                    name="stock" 
+                    value="{{ producto.stock|floatformat:0 }}"
+                    step="1"
+                    min="0"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                >
+            </div>
+
+            <!-- Precios en grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Precio de Compra -->
+                <div>
+                    <label for="price_buy" class="block text-sm font-medium text-gray-700 mb-2">
+                        Precio de Compra <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="price_buy" 
+                        name="price_buy" 
+                        value="{{ producto.price_buy|floatformat:0 }}"
+                        step="1"
+                        min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    >
+                </div>
+
+                <!-- Precio de Venta -->
+                <div>
+                    <label for="price_sale" class="block text-sm font-medium text-gray-700 mb-2">
+                        Precio de Venta <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="price_sale" 
+                        name="price_sale" 
+                        value="{{ producto.price_sale|floatformat:0 }}"
+                        step="1"
+                        min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Categoría -->
+            <div class="mb-4">
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                    Categoría <span class="text-red-500">*</span>
+                </label>
+                <select 
+                    id="category" 
+                    name="category"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                >
+                    <option value="">Selecciona una categoría</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id_category }}" {% if categoria_actual_id and cat.id_category|stringformat:"s" == categoria_actual_id %}selected{% endif %}>
+                        {{ cat.name_category }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-6">
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                    Descripción <span class="text-red-500">*</span>
+                </label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                >{{ producto.description }}</textarea>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-center justify-end space-x-3">
+                <a 
+                    href="{% url 'productos' %}" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    Cancelar
+                </a>
+                <button 
+                    type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+        <p class="text-sm text-yellow-800">
+            <strong>Nota:</strong> Los cambios realizados se registrarán en el historial de movimientos.
+        </p>
+    </div>
+</div>
+
+<!-- JavaScript para vista previa de imagen -->
+<script>
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('preview-image');
+    
+    if (file) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            // Si preview es un img, actualizar src
+            if (preview.tagName === 'IMG') {
+                preview.src = e.target.result;
+            } else {
+                // Si es un div, reemplazarlo por un img
+                const newImg = document.createElement('img');
+                newImg.id = 'preview-image';
+                newImg.src = e.target.result;
+                newImg.className = 'h-32 w-32 object-cover rounded-lg border-2 border-gray-200';
+                newImg.alt = 'Vista previa';
+                preview.parentNode.replaceChild(newImg, preview);
+            }
+        };
+        
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+{% endblock %}

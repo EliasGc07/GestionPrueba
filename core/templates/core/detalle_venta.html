@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalle de Venta - Gestor de Inventario{% endblock %}
+{% block page_title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">Venta #{{ venta.id_sale|slice:":8" }}</h2>
+                <p class="text-gray-600">Fecha: {{ venta.date_sale|date:"d/m/Y" }}</p>
+                <p class="text-gray-600">Método de Pago: {{ venta.pay_method }}</p>
+                <p class="text-gray-600">Items: {{ venta.items }}</p>
+                {% if venta.utility %}
+                <p class="text-gray-600">Utilidad: ${{ venta.utility|floatformat:0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                {% if venta.state %}
+                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Activa</span>
+                {% else %}
+                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Cancelada</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="border-t pt-4">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold mb-2">Total de la Venta</h3>
+                <p class="text-3xl font-bold text-green-600">${{ venta.total|floatformat:0 }}</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between mt-6 pt-4 border-t">
+            <a href="{% url 'ventas' %}" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Volver</a>
+            {% if venta.state %}
+            <a href="#" onclick="if(confirm('¿Cancelar esta venta?')) window.location.href='{% url 'cancelar_venta' venta.id_sale %}'" 
+               class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Cancelar Venta</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

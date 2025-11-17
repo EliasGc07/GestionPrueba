@@ -1,0 +1,371 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestor de Inventario{% endblock %}</title>
+
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    {% tailwind_css %}
+    
+    <style>
+        .sidebar-link.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        /* Animación suave para el sidebar */
+        #sidebar {
+            transition: transform 300ms ease-in-out, width 300ms ease-in-out;
+        }
+        
+        /* Ocultar texto con fade */
+        .sidebar-text {
+            transition: opacity 300ms ease-in-out, width 300ms ease-in-out;
+            white-space: nowrap;
+        }
+        
+        .sidebar-collapsed .sidebar-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+        
+        /* Centrar iconos cuando está colapsado */
+        .sidebar-collapsed .sidebar-link {
+            justify-content: center;
+        }
+        
+        /* Centrar avatar de usuario cuando está colapsado */
+        .sidebar-collapsed #user-profile {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        .sidebar-collapsed .p-4.border-t {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        
+        /* Tooltip al hacer hover en sidebar colapsado */
+        .sidebar-collapsed .sidebar-link {
+            position: relative;
+        }
+        
+        .sidebar-collapsed .sidebar-link:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 10px;
+            padding: 8px 12px;
+            background-color: #1f2937;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Overlay para móviles */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+            transition: opacity 300ms ease-in-out;
+        }
+        
+        #sidebar-overlay.active {
+            display: block;
+        }
+        
+        /* Responsive: sidebar fijo en móviles */
+        @media (max-width: 1024px) {
+            #sidebar {
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+            
+            #sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            /* Forzar sidebar completo en móviles (no colapsado) */
+            #sidebar.mobile-open {
+                width: 16rem !important; /* w-64 */
+            }
+            
+            #sidebar.mobile-open .sidebar-text {
+                opacity: 1 !important;
+                width: auto !important;
+            }
+            
+            #sidebar.mobile-open .sidebar-link {
+                justify-content: flex-start !important;
+            }
+            
+            #sidebar.mobile-open .p-4.border-t > div {
+                justify-content: flex-start !important;
+            }
+        }
+        
+        /* Desktop: mantener comportamiento normal */
+        @media (min-width: 1025px) {
+            #sidebar {
+                position: relative;
+                transform: translateX(0) !important;
+            }
+            
+            #sidebar-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Overlay para móviles -->
+    <div id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-gray-900 text-white w-64 flex-shrink-0 flex flex-col h-full">
+        
+        <!-- Logo / Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+            <span id="logo-text" class="sidebar-text text-xl font-bold text-blue-400">Inventario</span>
+            <button id="toggle-btn" class="p-2 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="{% url 'dashboard' %}" data-tooltip="Dashboard" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span class="sidebar-text">Dashboard</span>
+            </a>
+            
+            <a href="{% url 'productos' %}" data-tooltip="Productos" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if request.resolver_match.url_name == 'productos' %}active{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                <span class="sidebar-text">Productos</span>
+            </a>
+            
+            <a href="{% url 'ventas' %}" data-tooltip="Ventas" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if request.resolver_match.url_name == 'ventas' %}active{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path>
+                </svg>
+                <span class="sidebar-text">Ventas</span>
+            </a>
+            
+            <a href="{% url 'historial_movimientos' %}" data-tooltip="Historial" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if request.resolver_match.url_name == 'historial_movimientos' %}active{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                <span class="sidebar-text">Historial</span>
+            </a>
+            
+            {% if request.session.is_admin %}
+            <a href="{% url 'usuarios' %}" data-tooltip="Usuarios" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors {% if request.resolver_match.url_name == 'usuarios' %}active{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <span class="sidebar-text flex-1">Usuarios</span>
+            </a>
+            {% endif %}
+        </nav>
+        
+        <!-- User Profile -->
+        <div class="p-4 border-t border-gray-700">
+            <div id="user-profile" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                    <span class="text-sm font-semibold">{{ request.session.username|slice:":2"|upper }}</span>
+                </div>
+                <div class="sidebar-text overflow-hidden flex-1">
+                    <p class="text-sm font-medium truncate">{{ request.session.user_name }}</p>
+                    <p class="text-xs text-gray-400 truncate">{{ request.session.username }}</p>
+                </div>
+                <a href="{% url 'logout' %}" class="sidebar-text text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-gray-800 transition flex-shrink-0" title="Cerrar sesión">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm z-10">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile Toggle -->
+                    <button id="mobile-toggle" class="p-2 rounded-lg hover:bg-gray-100 lg:hidden transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    <h2 class="text-2xl font-semibold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h2>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mensajes -->
+        {% if messages %}
+            <div class="px-6 py-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <!-- JavaScript para el sidebar retráctil y responsive -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        let isCollapsed = false;
+        let isMobile = window.innerWidth < 1025;
+
+        // Función para detectar si estamos en móvil
+        function checkMobile() {
+            isMobile = window.innerWidth < 1025;
+        }
+
+        // Toggle sidebar en desktop (colapsar/expandir)
+        function toggleDesktopSidebar() {
+            if (isMobile) return;
+            
+            isCollapsed = !isCollapsed;
+            
+            if (isCollapsed) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+                sidebar.classList.add('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+                sidebar.classList.remove('sidebar-collapsed');
+            }
+            
+            // Guardar estado
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+        }
+
+        // Toggle sidebar en móvil (mostrar/ocultar)
+        function toggleMobileSidebar() {
+            if (!isMobile) return;
+            
+            const isOpen = sidebar.classList.contains('mobile-open');
+            
+            if (isOpen) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            } else {
+                sidebar.classList.add('mobile-open');
+                overlay.classList.add('active');
+            }
+        }
+
+        // Cerrar sidebar móvil al hacer click en overlay
+        overlay.addEventListener('click', function() {
+            if (isMobile) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            }
+        });
+
+        // Toggle desde botón desktop
+        toggleBtn.addEventListener('click', function() {
+            if (isMobile) {
+                toggleMobileSidebar();
+            } else {
+                toggleDesktopSidebar();
+            }
+        });
+        
+        // Toggle desde botón móvil
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', toggleMobileSidebar);
+        }
+
+        // Manejar cambios de tamaño de ventana
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobile;
+            checkMobile();
+            
+            // Si cambió de móvil a desktop o viceversa
+            if (wasMobile !== isMobile) {
+                // Limpiar clases de móvil
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+                
+                // En desktop, restaurar estado guardado
+                if (!isMobile) {
+                    const savedState = localStorage.getItem('sidebarCollapsed');
+                    if (savedState === 'true' && !isCollapsed) {
+                        toggleDesktopSidebar();
+                    } else if (savedState === 'false' && isCollapsed) {
+                        toggleDesktopSidebar();
+                    }
+                } else {
+                    // En móvil, asegurar que no esté colapsado
+                    sidebar.classList.remove('w-20', 'sidebar-collapsed');
+                    sidebar.classList.add('w-64');
+                    isCollapsed = false;
+                }
+            }
+        });
+
+        // Restaurar estado guardado en desktop al cargar
+        window.addEventListener('DOMContentLoaded', function() {
+            checkMobile();
+            
+            if (!isMobile) {
+                const savedState = localStorage.getItem('sidebarCollapsed');
+                if (savedState === 'true') {
+                    toggleDesktopSidebar();
+                }
+            }
+        });
+
+        // Cerrar sidebar móvil al hacer click en un enlace
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (isMobile) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Ignorar entorno virtual
+venv/
+
+# Ignorar archivos de Python compilados
+__pycache__/
+*.py[cod]
+
+# Ignorar configuraciones de entorno
+.env
+
+# Ignorar archivos grandes o binarios
+*.exe
+*.dll
+*.zip
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
